@@ -36,7 +36,7 @@ def slices(s, args):
         # So: This little section is the magic. This is where you can easily apply
         # filters to "res" just follow this pattern, where;
         # "something" can be any test you want
-        # "whatever" can be any variety of coditions
+        # "whatever" can be any variety of conditions
         # if something:
         #      yield "whatever"
         #      position += length
@@ -46,7 +46,7 @@ def slices(s, args):
             position += length
             continue
 
-        # yield the raw value, with leading and trailing spaces stripped off the end
+        # yield the raw value, with leading and trailing spaces stripped off the endg
         yield line.strip()
         # yield s[position:position + length]
         position += length
