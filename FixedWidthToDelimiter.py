@@ -25,11 +25,30 @@ import os.path
 import sys
 
 
+# https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do
+# https://realpython.com/introduction-to-python-generators/
 def slices(s, args):
     position = 0
     for length in args:
         length = int(length)
-        yield s[position:position + length]
+        line = s[position:position + length]
+
+        # So: This little section is the magic. This is where you can easily apply
+        # filters to "res" just follow this pattern, where;
+        # "something" can be any test you want
+        # "whatever" can be any variety of coditions
+        # if something:
+        #      yield "whatever"
+        #      position += length
+        #      continue
+        if "999.9" in line:
+            yield "na"
+            position += length
+            continue
+
+        # yield the raw value, with leading and trailing spaces stripped off the end
+        yield line.strip()
+        # yield s[position:position + length]
         position += length
 
 
@@ -84,7 +103,6 @@ fieldNames = []
 fieldLength = []
 myvars = OrderedDict()
 
-
 # Read the config file
 with open(ConfigFile) as myfile:
     for line in myfile:
@@ -99,8 +117,15 @@ for key, value in myvars.items():
 with open(OutputFile, 'w') as f1:
     fieldNames = DELIMITER.join(map(str, fieldNames))
     f1.write(fieldNames + "\n")
+    linenumber = 1
     with open(InputFile, 'r') as f:
         for line in f:
+            # skip the first few lines, or optionally treat them differently
+            if linenumber < 5:
+                linenumber += 1
+                continue
             rec = (list(slices(line, fieldLength)))
+
             myLine = DELIMITER.join(map(str, rec))
             f1.write(myLine + "\n")
+            linenumber += 1
