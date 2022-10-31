@@ -33,7 +33,8 @@ def slices(s, args):
         length = int(length)
         line = s[position:position + length]
 
-        # So: This little section is the magic. This is where you can easily apply
+        # MAGIC
+        # This is where you can easily apply
         # filters to "res" just follow this pattern, where;
         # "something" can be any test you want
         # "whatever" can be any variety of conditions
@@ -41,7 +42,7 @@ def slices(s, args):
         #      yield "whatever"
         #      position += length
         #      continue
-        if "999.9" in line:
+        if "9999.9" in line:
             yield "na"
             position += length
             continue
@@ -120,6 +121,7 @@ with open(OutputFile, 'w') as f1:
     linenumber = 1
     with open(InputFile, 'r') as f:
         for line in f:
+            # MAGIC
             # skip the first few lines, or optionally treat them differently
             if linenumber < 5:
                 linenumber += 1
