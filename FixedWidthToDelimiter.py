@@ -3,6 +3,7 @@ import argparse
 from argparse import ArgumentParser
 import os.path
 import sys
+import re
 
 
 # https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do
@@ -24,6 +25,11 @@ def slices(s, args):
         #      continue
         if "9999.9" in line:
             yield "na"
+            continue
+        if line.startswith('a'):
+            # these are called Regular expressions. ^ means start of files \s* means "a bunch of spaces"
+            line = re.sub(r"^a\s*", "", line)
+            yield line.strip()
             continue
 
         # yield the raw value, with leading and trailing spaces stripped off the end
