@@ -1,4 +1,3 @@
-"""
 from collections import OrderedDict
 import argparse
 from argparse import ArgumentParser

@@ -8,4 +8,4 @@ Look for the word "MAGIC" in the script
 
 Run it like this
 
-`python3 ./FixedWidthToDelimiter.py -d ',' -i min/dn1124112.txt -c Config.txt -o out.csv`
+`python3 ./FixedWidthToDelimiter.py -d ',' -c Config.txt`
