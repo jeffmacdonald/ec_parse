@@ -32,6 +32,7 @@ def slices(s, args):
     for length in args:
         length = int(length)
         line = s[position:position + length]
+        position += length
 
         # MAGIC
         # This is where you can easily apply
@@ -40,17 +41,13 @@ def slices(s, args):
         # "whatever" can be any variety of conditions
         # if something:
         #      yield "whatever"
-        #      position += length
         #      continue
         if "9999.9" in line:
             yield "na"
-            position += length
             continue
 
         # yield the raw value, with leading and trailing spaces stripped off the endg
         yield line.strip()
-        # yield s[position:position + length]
-        position += length
 
 
 def extant_file(x):
@@ -64,30 +61,59 @@ def extant_file(x):
     return x
 
 
+def parse_files(args, InputFile):
+    OutputFile = str(InputFile) + ".csv"
+    DELIMITER = args.Delimiter
+
+    fieldNames = []
+    fieldLength = []
+    myvars = OrderedDict()
+
+    # Read the config file
+    with open(ConfigFile) as myfile:
+        for line in myfile:
+            name, var = line.partition(",")[::2]
+            myvars[name.strip()] = int(var)
+    for key, value in myvars.items():
+        fieldNames.append(key)
+        fieldLength.append(value)
+
+    # This is where we actually process the files
+    # And where we'd do things like either skip the first few lines, or process them differently or whatever.
+    with open(OutputFile, 'w') as f1:
+        fieldNames = DELIMITER.join(map(str, fieldNames))
+        f1.write(fieldNames + "\n")
+        linenumber = 0
+        with open(InputFile, 'r') as f:
+            for line in f:
+                linenumber += 1
+
+                # MAGIC
+                # skip the first few lines, or optionally treat them differently
+                if linenumber == 1:
+                    line_sections = line.split(",")
+                    rec = "FILE ID is :  " + line_sections[0]
+                    myLine = rec
+                elif linenumber == 2:
+                    continue
+                elif linenumber == 3:
+                    continue
+                elif linenumber == 4:
+                    continue
+                else:
+                    rec = (list(slices(line, fieldLength)))
+                    myLine = DELIMITER.join(map(str, rec))
+
+                f1.write(myLine + "\n")
+
+
 parser = ArgumentParser(
-    description="Please provide your Inputs as -i InputFile -o OutPutFile -c ConfigFile")
-parser.add_argument("-i", dest="InputFile", required=True,
-                    help="Provide your Input file name here, if file is on different path than where this script resides then provide full path of the file", metavar="FILE", type=extant_file)
-parser.add_argument("-o", dest="OutputFile", required=False,
-                    help="Provide your Output file name here, if file is on different path than where this script resides then provide full path of the file", metavar="FILE")
+    description="Please provide your Inputs as -c ConfigFile -d Delimiter")
 parser.add_argument("-c", dest="ConfigFile", required=False,
                     help="Provide your Config file name here,File should have value as fieldName,fieldLength. if file is on different path than where this script resides then provide full path of the file", metavar="FILE", type=extant_file)
 parser.add_argument("-d", dest="Delimiter", required=False,
                     help="Provide the delimiter string you want", metavar="STRING", default="|")
-
 args = parser.parse_args()
-
-# Input file madatory
-InputFile = args.InputFile
-# Delimiter by default "|"
-DELIMITER = args.Delimiter
-
-# Output file checks
-if args.OutputFile is None:
-    OutputFile = str(InputFile) + "Delimited.txt"
-    print("Setting Ouput file as " + OutputFile)
-else:
-    OutputFile = args.OutputFile
 
 # Config file check
 if args.ConfigFile is None:
@@ -100,34 +126,10 @@ if args.ConfigFile is None:
 else:
     ConfigFile = args.ConfigFile
 
-fieldNames = []
-fieldLength = []
-myvars = OrderedDict()
+for dirname, dirnames, filenames in os.walk('min/'):
+    for filename in filenames:
+        parse_files(args, dirname + filename)
 
-# Read the config file
-with open(ConfigFile) as myfile:
-    for line in myfile:
-        name, var = line.partition(",")[::2]
-        myvars[name.strip()] = int(var)
-for key, value in myvars.items():
-    fieldNames.append(key)
-    fieldLength.append(value)
-
-# This is where we actually process the files
-# And where we'd do things like either skip the first few lines, or process them differently or whatever.
-with open(OutputFile, 'w') as f1:
-    fieldNames = DELIMITER.join(map(str, fieldNames))
-    f1.write(fieldNames + "\n")
-    linenumber = 1
-    with open(InputFile, 'r') as f:
-        for line in f:
-            # MAGIC
-            # skip the first few lines, or optionally treat them differently
-            if linenumber < 5:
-                linenumber += 1
-                continue
-            rec = (list(slices(line, fieldLength)))
-
-            myLine = DELIMITER.join(map(str, rec))
-            f1.write(myLine + "\n")
-            linenumber += 1
+for dirname, dirnames, filenames in os.walk('max/'):
+    for filename in filenames:
+        parse_files(args, dirname + filename)
