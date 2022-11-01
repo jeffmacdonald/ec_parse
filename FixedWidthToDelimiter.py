@@ -41,22 +41,9 @@ def extant_file(x):
     return x
 
 
-def parse_files(args, InputFile):
+def parse_files(args, InputFile, fieldNames, fieldLength):
     OutputFile = str(InputFile) + ".csv"
     DELIMITER = args.Delimiter
-
-    fieldNames = []
-    fieldLength = []
-    myvars = OrderedDict()
-
-    # Read the config file
-    with open(ConfigFile) as myfile:
-        for line in myfile:
-            name, var = line.partition(",")[::2]
-            myvars[name.strip()] = int(var)
-    for key, value in myvars.items():
-        fieldNames.append(key)
-        fieldLength.append(value)
 
     # This is where we actually process the files
     # And where we'd do things like either skip the first few lines, or process them differently or whatever.
@@ -87,6 +74,25 @@ def parse_files(args, InputFile):
                 f1.write(myLine + "\n")
 
 
+def parse_dir(args, dir):
+    fieldNames = []
+    fieldLength = []
+    myvars = OrderedDict()
+
+    # Read the config file
+    with open(ConfigFile) as myfile:
+        for line in myfile:
+            name, var = line.partition(",")[::2]
+            myvars[name.strip()] = int(var)
+    for key, value in myvars.items():
+        fieldNames.append(key)
+        fieldLength.append(value)
+
+    for dirname, dirnames, filenames in os.walk(dir + '/'):
+        for filename in filenames:
+            parse_files(args, dirname + filename, fieldNames, fieldLength)
+
+
 parser = ArgumentParser(
     description="Please provide your Inputs as -c ConfigFile -d Delimiter")
 parser.add_argument("-c", dest="ConfigFile", required=False,
@@ -106,10 +112,5 @@ if args.ConfigFile is None:
 else:
     ConfigFile = args.ConfigFile
 
-for dirname, dirnames, filenames in os.walk('min/'):
-    for filename in filenames:
-        parse_files(args, dirname + filename)
-
-for dirname, dirnames, filenames in os.walk('max/'):
-    for filename in filenames:
-        parse_files(args, dirname + filename)
+parse_dir(args, 'min')
+parse_dir(args, 'max')
