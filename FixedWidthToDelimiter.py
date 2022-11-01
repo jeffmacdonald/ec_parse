@@ -26,7 +26,7 @@ def slices(s, args):
             yield "na"
             continue
 
-        # yield the raw value, with leading and trailing spaces stripped off the endg
+        # yield the raw value, with leading and trailing spaces stripped off the end
         yield line.strip()
 
 
